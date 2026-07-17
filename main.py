@@ -49,7 +49,7 @@ def run_one():
 
     print("[5/5] Uploading to YouTube...")
     footage_credit = "Footage: NASA/Pexels/Pixabay (public domain / free-use, per each service's license)."
-    description = seo.build_description(script, footage_credit)."
+    description = seo.build_description(script, footage_credit)
     video_id = upload.upload_video(
         final_path,
         title=script["title"],
