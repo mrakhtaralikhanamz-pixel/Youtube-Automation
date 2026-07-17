@@ -5,7 +5,7 @@ import os
 import shutil
 
 import config
-from pipeline import tts, footage, assemble, thumbnail, upload
+from pipeline import tts, footage, assemble, thumbnail, upload, seo
 
 
 def _next_queued_script():
