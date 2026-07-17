@@ -48,8 +48,8 @@ def run_one():
     thumbnail.make_thumbnail(final_path, script["title"], thumb_path, frame_path)
 
     print("[5/5] Uploading to YouTube...")
-    description = script.get("description") or script["body"]
-    description += "\n\nFootage: NASA/Pexels/Pixabay (public domain / free-use, per each service's license)."
+    footage_credit = "Footage: NASA/Pexels/Pixabay (public domain / free-use, per each service's license)."
+    description = seo.build_description(script, footage_credit)."
     video_id = upload.upload_video(
         final_path,
         title=script["title"],
