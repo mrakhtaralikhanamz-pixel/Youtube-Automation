@@ -27,7 +27,9 @@ def make_thumbnail(video_path: str, title_text: str, out_path: str, frame_path: 
     _grab_frame(video_path, frame_path)
     img = Image.open(frame_path).convert("RGB")
     draw = ImageDraw.Draw(img)
-    font = _find_font(size=int(img.width * 0.09))
+    requested_size = int(img.width * 0.09)
+    font = _find_font(size=requested_size)
+    font_size = getattr(font, "size", requested_size)
 
     # simple word-wrap
     words, lines, current = title_text.split(), [], ""
@@ -41,7 +43,7 @@ def make_thumbnail(video_path: str, title_text: str, out_path: str, frame_path: 
     if current:
         lines.append(current)
 
-    line_height = font.size + 10
+    line_height = font_size + 10
     total_height = line_height * len(lines)
     y = img.height * 0.55 - total_height / 2
 
