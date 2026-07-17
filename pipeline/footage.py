@@ -93,7 +93,8 @@ def fetch_clip(keyword: str, dest_path: str) -> str:
             result = func(keyword, dest_path)
             if result:
                 return result
-        except requests.RequestException:
+        except (requests.RequestException, KeyError, IndexError, ValueError) as e:
+            print(f"  (footage source '{source_name}' failed for '{keyword}': {e}; trying next source)")
             continue
     raise RuntimeError(f"No footage found for keyword '{keyword}' from any configured source.")
 
