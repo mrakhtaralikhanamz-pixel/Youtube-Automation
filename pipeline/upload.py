@@ -1,6 +1,7 @@
 """final .mp4 + thumbnail -> uploaded (default: private) YouTube video, via Data API v3."""
 import google.oauth2.credentials
 import googleapiclient.discovery
+import googleapiclient.errors
 import googleapiclient.http
 
 import config
@@ -44,9 +45,14 @@ def upload_video(video_path: str, title: str, description: str, tags, thumbnail_
     video_id = response["id"]
 
     if thumbnail_path:
-        youtube.thumbnails().set(
-            videoId=video_id,
-            media_body=googleapiclient.http.MediaFileUpload(thumbnail_path),
-        ).execute()
+        try:
+            youtube.thumbnails().set(
+                videoId=video_id,
+                media_body=googleapiclient.http.MediaFileUpload(thumbnail_path),
+            ).execute()
+        except googleapiclient.errors.HttpError as e:
+            # Custom thumbnails require the channel to have completed phone verification.
+            # Don't let a thumbnail failure throw away an otherwise-successful upload.
+            print(f"  (warning: could not set custom thumbnail, video still uploaded: {e})")
 
     return video_id
