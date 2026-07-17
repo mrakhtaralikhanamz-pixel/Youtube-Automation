@@ -1,23 +1,20 @@
 name: Daily Short - produce and upload next queued video
-
 on:
   workflow_dispatch: {}
   schedule:
     - cron: "0 14 * * *"
-
 jobs:
   produce-and-upload:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
       - name: Install dependencies
         run: pip install -r requirements.txt
-
       - name: Run pipeline
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
@@ -26,7 +23,6 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
         run: python main.py
-
       - name: Commit updated queue state
         run: |
           git config user.name "yt-automation-bot"
