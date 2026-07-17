@@ -82,7 +82,10 @@ def _fallback_cues_from_text(text: str, duration_seconds: float):
 
 
 async def _synthesize(text: str, voice: str, mp3_path: str, srt_path: str):
-    communicate = edge_tts.Communicate(text, voice)
+    # edge-tts defaults to sentence-level ("SentenceBoundary") timing metadata, which is why
+    # word_events kept coming back empty and triggering the even-split fallback below --
+    # explicitly asking for word-level boundaries gives us real per-word sync instead.
+    communicate = edge_tts.Communicate(text, voice, boundary="WordBoundary")
     word_events = []
 
     with open(mp3_path, "wb") as audio_file:
