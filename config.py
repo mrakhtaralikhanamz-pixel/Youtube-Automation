@@ -43,12 +43,19 @@ MADE_FOR_KIDS = False
 # and kept last in priority since it skews toward older archival film rather than modern b-roll.
 FOOTAGE_SOURCES = ["nasa", "pexels", "pixabay", "archive"]  # NASA/archive need no key; Pexels/Pixabay need free API keys below
 
+# --- Auto script generation (keeps content_queue topped up with no manual writing) ---
+# Free, no credit card, ~1,500 requests/day: https://aistudio.google.com/apikey
+SCRIPTGEN_MODEL = "gemini-2.5-flash"
+QUEUE_MIN_SIZE = 1     # once content_queue drops to this many scripts (or fewer)...
+QUEUE_TARGET_SIZE = 4  # ...auto-generate new ones until it's back up to this many
+
 # --- Secrets (set as environment variables / GitHub Actions secrets — never hardcode) ---
 PEXELS_API_KEY = os.environ.get("PEXELS_API_KEY", "")
 PIXABAY_API_KEY = os.environ.get("PIXABAY_API_KEY", "")
 YT_CLIENT_ID = os.environ.get("YT_CLIENT_ID", "")
 YT_CLIENT_SECRET = os.environ.get("YT_CLIENT_SECRET", "")
 YT_REFRESH_TOKEN = os.environ.get("YT_REFRESH_TOKEN", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 # --- Paths ---
 QUEUE_DIR = "content_queue"
