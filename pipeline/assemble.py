@@ -22,9 +22,26 @@ def _normalize_clip(src: str, dst: str, target_seconds: float):
     sorts of native frame rates (15fps is common for older archival footage), and
     without normalizing this here the final video inherits whatever the clip happened
     to be shot at, which reads as choppy/stuttery when it's lower than ~24fps.
+
+    Always applies a slow, continuous Ken Burns-style drift/zoom too. A lot of free
+    stock "space" footage (from Pexels/Pixabay especially) is really a near-static
+    digital painting or a barely-animated loop -- measured with ffmpeg's scene-change
+    detector on a real produced video and most clips scored under 0.002 (essentially
+    zero motion, i.e. it reads as a photo, not a video). Overscanning by 15% and
+    panning/zooming with a sine curve based on absolute time guarantees visible,
+    smooth motion on every clip regardless of whether the source itself moves at all,
+    and doing it as a function of time (not frame count) means it stays smooth even
+    though the source is being looped underneath it.
     """
     w, h = config.VIDEO_WIDTH, config.VIDEO_HEIGHT
-    vf = f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},setsar=1,fps=30"
+    overscan_w, overscan_h = int(w * 1.15), int(h * 1.15)
+    vf = (
+        f"scale={overscan_w}:{overscan_h}:force_original_aspect_ratio=increase,"
+        f"crop={w}:{h}:"
+        f"x='(in_w-out_w)/2*(1+sin(t*0.05))':"
+        f"y='(in_h-out_h)/2*(1+sin(t*0.04))',"
+        f"setsar=1,fps=30"
+    )
     subprocess.run(
         [
             "ffmpeg", "-y", "-stream_loop", "-1", "-i", src,
