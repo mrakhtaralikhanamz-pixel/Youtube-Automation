@@ -38,7 +38,10 @@ DEFAULT_CATEGORY_ID = "27"    # 27 = Education. See https://developers.google.co
 MADE_FOR_KIDS = False
 
 # --- Footage sources (in priority order; first with results wins per keyword) ---
-FOOTAGE_SOURCES = ["nasa", "pexels", "pixabay"]  # NASA needs no key; Pexels/Pixabay need free API keys below
+# "archive" = Internet Archive (archive.org) -- free, no key, but its catalog mixes public-domain
+# and copyrighted uploads together, so it's filtered to public-domain-only items (see footage.py)
+# and kept last in priority since it skews toward older archival film rather than modern b-roll.
+FOOTAGE_SOURCES = ["nasa", "pexels", "pixabay", "archive"]  # NASA/archive need no key; Pexels/Pixabay need free API keys below
 
 # --- Secrets (set as environment variables / GitHub Actions secrets — never hardcode) ---
 PEXELS_API_KEY = os.environ.get("PEXELS_API_KEY", "")
