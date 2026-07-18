@@ -5,7 +5,7 @@ import os
 import shutil
 
 import config
-from pipeline import tts, footage, assemble, thumbnail, upload, seo
+from pipeline import tts, footage, assemble, thumbnail, upload, seo, scriptgen
 
 
 def _next_queued_script():
@@ -27,9 +27,20 @@ def _highlight_terms(script):
 
 
 def run_one():
+    print("[0/5] Checking content_queue and topping it up if needed...")
+    try:
+        scriptgen.top_up_queue()
+    except Exception as e:
+        # Auto-generation is a convenience, not a hard dependency -- if Gemini is down or
+        # misconfigured, fall back to whatever's already manually queued rather than failing.
+        print(f"  (scriptgen top-up failed, continuing with existing queue: {e})")
+
     script_path = _next_queued_script()
     if not script_path:
-        print("Content queue is empty — nothing to produce. Ask Claude to write more scripts.")
+        print(
+            "Content queue is empty — nothing to produce. Set GEMINI_API_KEY to auto-generate "
+            "new scripts, or add some to content_queue/ manually."
+        )
         return
 
     with open(script_path) as f:
