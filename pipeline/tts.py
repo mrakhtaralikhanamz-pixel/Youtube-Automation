@@ -143,7 +143,13 @@ async def _synthesize(text: str, voice: str, mp3_path: str, ass_path: str, highl
     # edge-tts defaults to sentence-level ("SentenceBoundary") timing metadata, which is why
     # word_events kept coming back empty and triggering the even-split fallback below --
     # explicitly asking for word-level boundaries gives us real per-word sync instead.
-    communicate = edge_tts.Communicate(text, voice, boundary="WordBoundary")
+    #
+    # rate/pitch are pulled down slightly from config -- the raw default delivery reads as
+    # a bit fast and flat/monotone for narration; a small slowdown and pitch dip reads as
+    # noticeably calmer and more natural without needing a different TTS engine.
+    communicate = edge_tts.Communicate(
+        text, voice, rate=config.VOICE_RATE, pitch=config.VOICE_PITCH, boundary="WordBoundary"
+    )
     word_events = []
 
     with open(mp3_path, "wb") as audio_file:
