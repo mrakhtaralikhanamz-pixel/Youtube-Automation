@@ -27,6 +27,6 @@ jobs:
         run: |
           git config user.name "yt-automation-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add content_queue content_done
+          git add content_queue content_done || true
           git diff --cached --quiet || git commit -m "chore: mark produced script as done [skip ci]"
           git push
