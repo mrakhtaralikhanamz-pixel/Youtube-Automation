@@ -15,6 +15,17 @@ def _next_queued_script():
     return files[0]
 
 
+def _highlight_terms(script):
+    """Pick the words to highlight in captions -- the video's main subject,
+    taken from its first (most specific) tag, e.g. "venus" or "fermi paradox".
+    """
+    tags = script.get("tags", [])
+    if not tags:
+        return set()
+    words = tags[0].replace("-", " ").split()
+    return {w.strip(".,'\"").lower() for w in words if len(w.strip(".,'\"")) > 2}
+
+
 def run_one():
     script_path = _next_queued_script()
     if not script_path:
@@ -31,16 +42,16 @@ def run_one():
 
     full_text = " ".join([script["hook"], script["body"], script["cta"]])
     narration_path = os.path.join(work_dir, "narration.mp3")
-    srt_path = os.path.join(work_dir, "captions.srt")
+    ass_path = os.path.join(work_dir, "captions.ass")
     print(f"[1/5] Synthesizing narration for: {script['title']}")
-    tts.synthesize(full_text, config.VOICE, narration_path, srt_path)
+    tts.synthesize(full_text, config.VOICE, narration_path, ass_path, highlight_terms=_highlight_terms(script))
 
     print(f"[2/5] Fetching footage for keywords: {script['footage_keywords']}")
     clip_paths = footage.fetch_all(script["footage_keywords"], os.path.join(work_dir, "clips"))
 
     final_path = os.path.join(work_dir, "final.mp4")
     print("[3/5] Assembling final video with ffmpeg...")
-    assemble.assemble(clip_paths, narration_path, srt_path, final_path, work_dir)
+    assemble.assemble(clip_paths, narration_path, ass_path, final_path, work_dir)
 
     thumb_path = os.path.join(work_dir, "thumbnail.jpg")
     frame_path = os.path.join(work_dir, "frame.jpg")
