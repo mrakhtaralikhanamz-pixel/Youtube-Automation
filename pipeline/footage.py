@@ -2,7 +2,10 @@
 
 Tries sources in the order given by config.FOOTAGE_SOURCES. NASA's Image and
 Video Library needs no API key at all (everything on it is public domain).
-Pexels and Pixabay need a free API key each (see README setup steps).
+Pexels and Pixabay need a free API key each (see README setup steps). Internet
+Archive needs no key either, but its catalog is a mix of public-domain and
+fully copyrighted uploads sitting side by side -- see _from_archive_org for
+how that's filtered down to only public-domain items.
 """
 import os
 import requests
@@ -44,6 +47,57 @@ def _from_nasa(keyword: str, dest_path: str):
     return _download(pick, dest_path)
 
 
+def _from_archive_org(keyword: str, dest_path: str):
+    """Internet Archive (archive.org) -- free, no API key, huge catalog including NASA's
+    own archival collections. The catch: archive.org hosts everything from public-domain
+    films to fully copyrighted uploads side by side, so this is filtered twice --
+    once server-side in the search query (licenseurl must mention "publicdomain"), and
+    again client-side against the item's actual metadata before ever downloading it.
+    Never relax the second check just because the first one already looks restrictive;
+    the search filter isn't guaranteed to be airtight and the client-side check is cheap.
+    """
+    search_url = "https://archive.org/advancedsearch.php"
+    query = f"({keyword}) AND mediatype:(movies) AND licenseurl:(*publicdomain*)"
+    resp = requests.get(
+        search_url,
+        params={
+            "q": query,
+            "fl[]": "identifier",
+            "rows": 5,
+            "output": "json",
+        },
+        timeout=HEADERS_TIMEOUT,
+    )
+    resp.raise_for_status()
+    docs = resp.json().get("response", {}).get("docs", [])
+    if not docs:
+        return None
+
+    for doc in docs:
+        identifier = doc.get("identifier")
+        if not identifier:
+            continue
+        meta_resp = requests.get(f"https://archive.org/metadata/{identifier}", timeout=HEADERS_TIMEOUT)
+        meta_resp.raise_for_status()
+        meta = meta_resp.json()
+
+        license_url = meta.get("metadata", {}).get("licenseurl", "")
+        if "publicdomain" not in license_url.lower():
+            continue  # server-side filter isn't airtight -- re-verify before trusting an item
+
+        server, item_dir = meta.get("server"), meta.get("dir")
+        files = meta.get("files", [])
+        if not (server and item_dir and files):
+            continue
+        candidates = [f["name"] for f in files if f.get("name", "").lower().endswith(".mp4")]
+        if not candidates:
+            continue
+        pick = candidates[len(candidates) // 2]  # mid-quality rendition, same policy as other sources
+        return _download(f"https://{server}{item_dir}/{pick}", dest_path)
+
+    return None
+
+
 def _from_pexels(keyword: str, dest_path: str):
     if not config.PEXELS_API_KEY:
         return None
@@ -80,7 +134,12 @@ def _from_pixabay(keyword: str, dest_path: str):
     return _download(pick["url"], dest_path)
 
 
-_SOURCE_FUNCS = {"nasa": _from_nasa, "pexels": _from_pexels, "pixabay": _from_pixabay}
+_SOURCE_FUNCS = {
+    "nasa": _from_nasa,
+    "pexels": _from_pexels,
+    "pixabay": _from_pixabay,
+    "archive": _from_archive_org,
+}
 
 
 def fetch_clip(keyword: str, dest_path: str) -> str:
