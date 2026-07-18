@@ -5,7 +5,19 @@ import os
 NICHE_NAME = "Space & Science Mysteries"
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920   # vertical, for Shorts
-VOICE = "en-US-GuyNeural"          # free edge-tts voice; try en-US-AriaNeural, en-GB-RyanNeural, etc.
+VOICE = "en-US-AndrewNeural"        # free edge-tts voice. GuyNeural (the old default) reads like an energetic
+                                     # radio announcer, which can feel "fake" for calm factual narration.
+                                     # Natural-sounding alternatives worth trying (just swap this string, no
+                                     # other code changes needed) -- listen to a few and pick what fits:
+                                     #   en-US-AndrewNeural / en-US-BrianNeural   -- calm, conversational male
+                                     #   en-US-AndrewMultilingualNeural           -- newer, more expressive male
+                                     #   en-US-AvaNeural / en-US-EmmaNeural       -- natural female
+                                     #   en-US-EmmaMultilingualNeural             -- newer, more expressive female
+                                     #   en-GB-RyanNeural / en-GB-SoniaNeural     -- British, calm documentary feel
+                                     # Preview any of these before committing to one: https://tts.travisvn.com
+                                     # or the "Speech Studio" voice gallery at https://speech.microsoft.com/portal/voicegallery
+VOICE_RATE = "-8%"                  # slightly slower than the engine's default -- default pace reads as rushed/flat
+VOICE_PITCH = "-2Hz"                 # slightly lower pitch -- reads as calmer/warmer, less "announcer-robotic"
 BACKGROUND_MUSIC_PATH = None        # optional path to a royalty-free mp3 (e.g. from YouTube Audio Library) mixed in quietly.
                                      # Leave as None to use the built-in synthesized ambient bed instead (no download needed).
 MUSIC_VOLUME_DB = -22                # how far to duck a BACKGROUND_MUSIC_PATH track under narration, if one is set
