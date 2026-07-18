@@ -22,11 +22,12 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
       - name: Commit updated queue state
         run: |
           git config user.name "yt-automation-bot"
           git config user.email "actions@users.noreply.github.com"
           git add content_queue content_done || true
-          git diff --cached --quiet || git commit -m "chore: mark produced script as done [skip ci]"
+          git diff --cached --quiet || git commit -m "chore: mark produced script as done / auto-generated new scripts [skip ci]"
           git push
